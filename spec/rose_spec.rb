@@ -14,6 +14,6 @@ RSpec.describe Rose do
 
   it "should have bundle_size_and_price" do 
     flower = Rose.new
-    expect(flower.bundle_size_and_price).to eq [{:size=>5, :price=>6.99}, {:size=>10, :price=>12.99}]
+    expect(flower.bundle_size_and_price).to eq [ {size: 5, price: BigDecimal.new('6.99')}, {size: 10, price: BigDecimal.new('12.99')} ]
   end
 end
