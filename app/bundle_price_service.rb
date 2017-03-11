@@ -5,10 +5,14 @@ require_relative './tulip.rb'
 
 class BundlePriceService
 
-  def call(quantity, code)
-    return 'Please enter valid quantity' unless quantity.is_a? Integer
-    return 'Please enter valid flower code' unless code && ['R12', 'L09', 'T58'].include?(code)
+  def call(argument)
+    return 'Invalid argument' unless argument
+    quantity, code = argument.split(' ')
 
+    return 'Please enter valid quantity and flower code eg: 10 R12' unless quantity.to_i.is_a? Integer
+    return 'Please enter valid quantity and flower code eg: 10 R12' unless code && ['R12', 'L09', 'T58'].include?(code)
+
+    quantity = quantity.to_i
     flower_klass = case code
                    when 'R12'
                      Rose
@@ -33,20 +37,18 @@ class BundlePriceService
 
     bundle_size_and_price.sort!{|a, b| b[:size] <=> a[:size] }
     bundle_size_and_price.each do |e|
-        number_of_bundle = unbundled_quantity/e[:size]
-        number_of_flower = number_of_bundle * e[:size]
-        
-        results << {
-                     bundle_size: e[:size],
-                     number_of_bundle: number_of_bundle,
-                     number_of_flower: number_of_bundle * e[:size],
-                     price_per_bundle: e[:price],
-                     price_for_this_bundle: (e[:price] * number_of_bundle),
-                     flower_name: flower.name,
-                     flower_code: flower.code
-                   }
-        unbundled_quantity = unbundled_quantity - number_of_flower
-      end
+      number_of_bundle = unbundled_quantity/e[:size]
+      number_of_flower = number_of_bundle * e[:size]
+      
+      results << { bundle_size: e[:size],
+                   number_of_bundle: number_of_bundle,
+                   number_of_flower: number_of_bundle * e[:size],
+                   price_per_bundle: e[:price],
+                   price_for_this_bundle: (e[:price] * number_of_bundle),
+                   flower_name: flower.name,
+                   flower_code: flower.code }
+      unbundled_quantity = unbundled_quantity - number_of_flower
+    end
 
     total_bundled_flowers = results.inject(0){|sum, h| sum + h[:number_of_flower]}
 
