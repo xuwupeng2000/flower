@@ -10,8 +10,25 @@ RSpec.describe BundlePriceService do
         it "should return correct result"  do 
           service = BundlePriceService.new
           results =  service.call(10, Rose.new.code)
-          expect(results).to eq [{:flower_name=>"Rose", :flower_code=>"R12", :bundle_size=>10, :number_of_bundle=>1, :number_of_flower=>10, :price_per_bundle=>12.99, :price_for_this_bundle=>12.99}]
-          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }).to eq 12.99
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 12.99
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(5, Rose.new.code)
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 6.99
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(15, Rose.new.code)
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 19.98
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(3, Rose.new.code)
+          expect(results).to eq 'Can not find bunlde fit this quantiy'
         end
       end
 
@@ -19,7 +36,31 @@ RSpec.describe BundlePriceService do
         it "should return correct result"  do 
           service = BundlePriceService.new
           results =  service.call(15, Lilie.new.code)
-          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }).to eq 41.90
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 41.90
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(3, Lilie.new.code)
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 9.95
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(6, Lilie.new.code)
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 16.95
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(87, Lilie.new.code)
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 241.5
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(7, Lilie.new.code)
+          expect(results).to eq 'Can not find bunlde fit this quantiy'
         end
       end
 
@@ -27,8 +68,25 @@ RSpec.describe BundlePriceService do
         it "should return correct result"  do 
           service = BundlePriceService.new
           results =  service.call(13, Tulip.new.code)
-          expect(results).to eq []
-          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }).to eq 25.85
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 25.85
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(12, Tulip.new.code)
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 22.94
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(3, Tulip.new.code)
+          expect(results.inject(0){|sum, h| sum + h[:price_for_this_bundle] }.to_f).to eq 5.95
+        end
+
+        it "should return correct result"  do 
+          service = BundlePriceService.new
+          results =  service.call(1, Tulip.new.code)
+          expect(results).to eq 'Can not find bunlde fit this quantiy'
         end
       end
       
@@ -44,9 +102,18 @@ RSpec.describe BundlePriceService do
       end
     end
 
-    context 'quantity does not fit into bundle' do
-      # Validate if the order can't fit into bundle where the result of mod is smaller than the smallest bundle size we have
-      
+    context 'quantity does not fit into any bundle' do
+      it "should return message"  do 
+        service = BundlePriceService.new
+        results =  service.call(11, Tulip.new.code)
+        expect(results).to eq 'Can not find bunlde fit this quantiy'
+      end
+
+      it "should return message"  do 
+        service = BundlePriceService.new
+        results =  service.call(1, Tulip.new.code)
+        expect(results).to eq 'Can not find bunlde fit this quantiy'
+      end
     end
 
     context 'code is not in the list' do

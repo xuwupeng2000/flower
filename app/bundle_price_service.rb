@@ -6,9 +6,6 @@ require_relative './tulip.rb'
 class BundlePriceService
 
   def call(quantity, code)
-    # Validate quantity is number
-    # Validate code is in the list
-    # Validate if the order can't fit into bundle where the result of mod is smaller than the smallest bundle size we have
     return 'Please enter valid quantity' unless quantity.is_a? Integer
     return 'Please enter valid flower code' unless code && ['R12', 'L09', 'T58'].include?(code)
 
@@ -20,36 +17,49 @@ class BundlePriceService
                    when 'T58'
                      Tulip
                    else
-                     raise 'Sorry'
+                     raise 'Sorry, should not ever reach there'
                    end
 
-    unbundled_quantity = quantity
-    results            = []
-    flower             = flower_klass.new
+    flower = flower_klass.new
+    results = fit_with(flower, flower.bundle_size_and_price, quantity)
+    results
+  end
 
-    flower.bundle_size_and_price
-      .sort{|a, b| b[:size] <=> a[:size] }
-      .each do |e|
+  private
+
+  def fit_with(flower, bundle_size_and_price, quantity)
+    unbundled_quantity = quantity
+    results = []
+
+    bundle_size_and_price.sort!{|a, b| b[:size] <=> a[:size] }
+    bundle_size_and_price.each do |e|
         number_of_bundle = unbundled_quantity/e[:size]
         number_of_flower = number_of_bundle * e[:size]
         
         results << {
-                     flower_name: flower.name,
-                     flower_code: flower.code,
                      bundle_size: e[:size],
                      number_of_bundle: number_of_bundle,
                      number_of_flower: number_of_bundle * e[:size],
                      price_per_bundle: e[:price],
-                     price_for_this_bundle: (e[:price] * number_of_bundle)
+                     price_for_this_bundle: (e[:price] * number_of_bundle),
+                     flower_name: flower.name,
+                     flower_code: flower.code
                    }
-        # If it does not fit we need to try different combination
         unbundled_quantity = unbundled_quantity - number_of_flower
+      end
+
+    total_bundled_flowers = results.inject(0){|sum, h| sum + h[:number_of_flower]}
+
+    if total_bundled_flowers != quantity
+      bundle_size_and_price.shift # Drop the largest size then try to fit the bundle again
+      if bundle_size_and_price.empty? # Reach the end
+        return 'Can not find bunlde fit this quantiy' 
+      else
+        fit_with(flower, bundle_size_and_price, quantity)
+      end
+    else
+      return results
     end
-
-    results # Return results
-
-    filtered = results.select{|e| e[:number_of_bundle] != 0}
-    filtered
   end
 
 end
